@@ -23,7 +23,7 @@ jobs:
       runFmt: true
       runValidate: true
       runPlan: true
-      runApply: false
+      runApply: true
       runDestroy: false
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
