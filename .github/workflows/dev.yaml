@@ -4,6 +4,7 @@ on:
     paths:
       - 'environments/dev.tfvars'
 
+
 jobs:
   call:
     uses: ./.github/workflows/terraform-multi.yml
