@@ -101,7 +101,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Terraform fmt
-        run: terraform fmt -check -recursive || terraform fmt -recursive
+        run: terraform fmt
 
   validate:
     if: ${{ inputs.runValidate }}
