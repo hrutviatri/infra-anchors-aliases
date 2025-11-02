@@ -206,4 +206,14 @@ lb_probe = {
 
 lb_rule = {
   lb1 = {
-    lb_name_
+    lb_name                         = "rit-loadbalancer-uat"
+    rg_name                         = "rit-uat-rg1"
+    backend_address_pool_db_ka_name = "rit-backend-pool-uat"
+    lb_rule_name                    = "rit-lb-rule-uat"
+    protocol                        = "Tcp"
+    frontend_port                   = 80
+    backend_port                    = 80
+    frontend_ip_configuration_name  = "rit-frontend-ipconfig-uat"
+    probe_name                      = "rit-health-probe-uat"
+  }
+}
