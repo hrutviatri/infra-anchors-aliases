@@ -1,0 +1,209 @@
+name: terraform-multi
+
+on:
+  workflow_call:
+    inputs:
+      environment:
+        required: true
+        type: string
+      tfvars_file:
+        required: true
+        type: string
+      rgname:
+        required: true
+        type: string
+      saname:
+        required: true
+        type: string
+      scname:
+        required: true
+        type: string
+      key:
+        required: true
+        type: string
+      runInit:
+        type: boolean
+        default: true
+      runFmt:
+        type: boolean
+        default: false
+      runValidate:
+        type: boolean
+        default: false
+      runPlan:
+        type: boolean
+        default: false
+      runApply:
+        type: boolean
+        default: false
+      runDestroy:
+        type: boolean
+        default: false
+    secrets:
+      AZURE_CLIENT_ID:
+        required: true
+      AZURE_TENANT_ID:
+        required: true
+      AZURE_SUBSCRIPTION_ID:
+        required: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  init:
+    if: ${{ inputs.runInit }}
+    runs-on: self-hosted
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform Init (remote backend)
+        run: |
+          terraform init \
+            -backend-config="resource_group_name=${{ inputs.rgname }}" \
+            -backend-config="storage_account_name=${{ inputs.saname }}" \
+            -backend-config="container_name=${{ inputs.scname }}" \
+            -backend-config="key=${{ inputs.key }}"
+
+      - name: Upload providers dir
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-providers
+          path: infra/.terraform
+      - name: Upload lockfile
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-lockfile
+          path: infra/.terraform.lock.hcl
+
+  fmt:
+    if: ${{ inputs.runFmt }}
+    needs: [init]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: tf-providers, path: infra/.terraform }
+      - uses: actions/download-artifact@v4
+        with: { name: tf-lockfile, path: infra }
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive || terraform fmt -recursive
+
+  validate:
+    if: ${{ inputs.runValidate }}
+    needs: [fmt, init]
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: tf-providers, path: infra/.terraform }
+      - uses: actions/download-artifact@v4
+        with: { name: tf-lockfile, path: infra }
+      - name: Terraform validate
+        run: terraform validate
+
+  plan:
+    if: ${{ inputs.runPlan }}
+    needs: [validate, fmt, init]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: tf-providers, path: infra/.terraform }
+      - uses: actions/download-artifact@v4
+        with: { name: tf-lockfile, path: infra }
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform plan
+        run: terraform plan -var-file="../${{ inputs.tfvars_file }}" -out="plan-${{ inputs.environment }}.tfplan"
+
+      - name: Upload plan
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf-plan-${{ inputs.environment }}
+          path: infra/plan-${{ inputs.environment }}.tfplan
+
+  apply:
+    if: ${{ inputs.runApply }}
+    needs: [plan, validate, fmt, init]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: tf-providers, path: infra/.terraform }
+      - uses: actions/download-artifact@v4
+        with: { name: tf-lockfile, path: infra }
+      - uses: actions/download-artifact@v4
+        with:
+          name: tf-plan-${{ inputs.environment }}
+          path: infra
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform apply
+        run: terraform apply -auto-approve "plan-${{ inputs.environment }}.tfplan"
+
+  destroy:
+    if: ${{ inputs.runDestroy }}
+    needs: [apply, plan, validate, fmt, init]
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { name: tf-providers, path: infra/.terraform }
+      - uses: actions/download-artifact@v4
+        with: { name: tf-lockfile, path: infra }
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Terraform destroy
+        run: terraform destroy -auto-approve -var-file="../${{ inputs.tfvars_file }}"

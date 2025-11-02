@@ -1,0 +1,26 @@
+name: prod
+on:
+  push:
+    paths:
+      - 'environments/prod.tfvars'
+
+jobs:
+  call:
+    uses: ./.github/workflows/terraform-multi.yml
+    with:
+      environment: prod
+      tfvars_file: environments/prod.tfvars
+      rgname: ritkargs
+      saname: ritkasas
+      scname: ritkascs
+      key: prod.tfstate
+      runInit: true
+      runFmt: false
+      runValidate: true
+      runPlan: true
+      runApply: true
+      runDestroy: false
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}

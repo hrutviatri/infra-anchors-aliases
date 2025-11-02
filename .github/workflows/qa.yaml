@@ -1,0 +1,26 @@
+name: qa
+on:
+  push:
+    paths:
+      - 'environments/qa.tfvars'
+
+jobs:
+  call:
+    uses: ./.github/workflows/terraform-multi.yml
+    with:
+      environment: qa
+      tfvars_file: environments/qa.tfvars
+      rgname: ritkargs
+      saname: ritkasas
+      scname: ritkascs
+      key: qa.tfstate
+      runInit: true
+      runFmt: false
+      runValidate: true
+      runPlan: true
+      runApply: false
+      runDestroy: false
+    secrets:
+      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
