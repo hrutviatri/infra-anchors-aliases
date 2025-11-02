@@ -201,7 +201,13 @@ nic_bp_association = {
 }
 
 lb_probe = {
-  lb1 = { probe_name = "rit-health-probe-uat", probe_protocol = "Tcp", probe_port = 80, rg_name = "rit-uat-rg1", lb_name = "rit-loadbalancer-uat" }
+  lb1 = { 
+probe_name = "rit-health-probe-uat"
+probe_protocol = "Tcp"
+probe_port = 80
+rg_name = "rit-uat-rg1"
+lb_name = "rit-loadbalancer-uat"
+}
 }
 
 lb_rule = {
