@@ -95,7 +95,7 @@ jobs:
 
   fmt:
     needs: [init]
-    if: ${{ always() && inputs.runFmt && (needs.init.result == 'success' || !inputs.runInit) }}
+    if: ${{ always() && inputs.runFmt && needs.init.result == 'success' }}
     runs-on: self-hosted
     defaults:
       run:
