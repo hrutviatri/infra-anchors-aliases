@@ -4,6 +4,10 @@ on:
     paths:
       - 'environments/uat.tfvars'
 
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   call:
     uses: ./.github/workflows/terraform-multi.yml
