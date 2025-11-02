@@ -81,17 +81,17 @@ jobs:
         run: terraform init -input=false -backend-config="resource_group_name=${{ inputs.rgname }}" -backend-config="storage_account_name=${{ inputs.saname }}" -backend-config="container_name=${{ inputs.scname }}" -backend-config="key=${{ inputs.key }}"
       
 
-      - name: Upload providers dir
-        uses: actions/upload-artifact@v4
-        with:
-          name: tf-providers
-          path: infra/.terraform/*
+      # - name: Upload providers dir
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: tf-providers
+      #     path: infra/.terraform/*
 
-      - name: Upload lockfile
-        uses: actions/upload-artifact@v4
-        with:
-          name: tf-lockfile
-          path: infra/.terraform.lock.hcl
+      # - name: Upload lockfile
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: tf-lockfile
+      #     path: infra/.terraform.lock.hcl
 
   fmt:
     if: ${{ inputs.runFmt }}
@@ -140,9 +140,6 @@ jobs:
           name: tf-plan-${{ inputs.environment }}
           path: infra/plan-${{ inputs.environment }}.tfplan
           if-no-files-found: error
-      - name: Show lockfile (plan)
-        shell: pwsh
-        run: Get-Content infra/.terraform.lock.hcl
 
             
   apply:
