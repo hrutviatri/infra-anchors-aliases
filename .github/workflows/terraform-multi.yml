@@ -85,7 +85,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tf-providers
-          path: infra/.terraform
+          path: infra/.terraform/*
 
       - name: Upload lockfile
         uses: actions/upload-artifact@v4
