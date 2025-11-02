@@ -48,7 +48,7 @@ jobs:
       # 👇 Manual inputs (push pe defaults apply honge; dispatch pe UI me poochhega)
       runInit:     ${{ inputs.do_init    || true  }}
       runFmt:      ${{ inputs.do_fmt     || false }}
-      runValidate: ${{ inputs.do_validate|| true  }}
+      runValidate: ${{ inputs.do_validate|| false  }}
       runPlan:     ${{ inputs.do_plan    || true  }}
       runApply:    ${{ inputs.do_apply   || false }}
       runDestroy:  ${{ inputs.do_destroy || false }}
