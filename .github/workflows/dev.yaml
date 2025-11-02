@@ -13,7 +13,7 @@ jobs:
   call:
     uses: ./.github/workflows/terraform-multi.yml
     with:
-      environment: dev
+      # environment: dev
       tfvars_file: environments/dev.tfvars
       rgname: ritkargs
       saname: ritkasas
