@@ -4,6 +4,10 @@ on:
     paths:
       - 'environments/dev.tfvars'
 
+permissions:
+  contents: read
+  id-token: write
+
 
 jobs:
   call:
