@@ -22,14 +22,14 @@ output "resource_group_ob_ids" {
 ##############
 #################
 
-output "virtual_networks" {
-  value = module.vnet_module.virtual_networks
-}
+# output "virtual_networks" {
+#   value = module.vnet_module.virtual_networks
+# }
 
-output "vnet_subnet_ids" {
-  value = module.vnet_module.vnet_subnet_ids
-}
+# output "vnet_subnet_ids" {
+#   value = module.vnet_module.vnet_subnet_ids
+# }
 
-output "lb_probe_ids" {
-  value = module.lb_health_probe.lb_probe_ids
-}
+# output "lb_probe_ids" {
+#   value = module.lb_health_probe.lb_probe_ids
+# }
