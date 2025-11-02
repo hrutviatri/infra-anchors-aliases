@@ -20,7 +20,7 @@ jobs:
       scname: ritkascs
       key: dev.tfstate
       runInit: true
-      runFmt: false
+      runFmt: true
       runValidate: true
       runPlan: true
       runApply: false
