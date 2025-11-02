@@ -28,7 +28,7 @@ jobs:
       key: uat.tfstate
 
       runInit:     ${{ inputs.do_init    || true  }}
-      runFmt:      ${{ inputs.do_fmt     || false }}
+      runFmt:      ${{ inputs.do_fmt     || true }}
       runValidate: ${{ inputs.do_validate|| true  }}
       runPlan:     ${{ inputs.do_plan    || true  }}
       runApply:    ${{ inputs.do_apply   || false }}
