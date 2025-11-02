@@ -23,7 +23,7 @@ on:
         type: string
       runInit:
         type: boolean
-        default: true
+        default: false
       runFmt:
         type: boolean
         default: false
