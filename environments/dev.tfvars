@@ -1,13 +1,15 @@
 resource_groups = {
   rg1 = {
-    name     = "rit-rg1"
+    name     = "rit-hrutviatri"
     location = "North Europe"
   }
 
 
 }
 ######
+
 ######
+
 ######
 
 
