@@ -159,6 +159,7 @@ jobs:
         with:
           name: tf-plan-${{ inputs.environment }}
           path: infra/plan-${{ inputs.environment }}.tfplan
+          if-no-files-found: error
 
   apply:
     if: ${{ inputs.runApply }}
@@ -178,7 +179,12 @@ jobs:
         # with:
         #   name: tf-plan-${{ inputs.environment }}
         #   path: infra
-
+        
+      - name: Download plan
+        uses: actions/download-artifact@v4
+        with:
+          name: tf-plan-${{ inputs.environment }}
+          path: infra
       - name: Azure Login (OIDC)
         uses: azure/login@v2
         with:
