@@ -94,8 +94,8 @@ jobs:
       #     path: infra/.terraform.lock.hcl
 
   fmt:
-    if: ${{ inputs.runFmt }}
     needs: [init]
+    if: ${{ always() && inputs.runFmt && (needs.init.result == 'success' || !inputs.runInit) }}
     runs-on: self-hosted
     defaults:
       run:
@@ -105,8 +105,14 @@ jobs:
         run: terraform fmt 
 
   validate:
-    if: ${{ inputs.runValidate }}
     needs: [fmt, init]
+    if: ${{ always()
+            && inputs.runValidate
+            && (
+                 ( inputs.runFmt  && needs.fmt.result  == 'success' ) ||
+                 ( !inputs.runFmt && needs.init.result == 'success' )
+               )
+         }}
     runs-on: self-hosted
     defaults:
       run:
@@ -116,8 +122,15 @@ jobs:
         run: terraform validate
 
   plan:
-    if: ${{ inputs.runPlan }}
     needs: [validate, fmt, init]
+    if: ${{ always()
+            && inputs.runPlan
+            && (
+                 ( inputs.runValidate                  && needs.validate.result == 'success' ) ||
+                 ( !inputs.runValidate && inputs.runFmt && needs.fmt.result      == 'success' ) ||
+                 ( !inputs.runValidate && !inputs.runFmt && needs.init.result    == 'success' )
+               )
+         }}
     runs-on: self-hosted
     # environment: ${{ inputs.environment }}
     defaults:
@@ -143,8 +156,16 @@ jobs:
 
             
   apply:
-    if: ${{ inputs.runApply }}
     needs: [plan, validate, fmt, init]
+    if: ${{ always()
+            && inputs.runApply
+            && (
+                 ( inputs.runPlan                                 && needs.plan.result     == 'success' ) ||
+                 ( !inputs.runPlan && inputs.runValidate          && needs.validate.result == 'success' ) ||
+                 ( !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result  == 'success' ) ||
+                 ( !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
+               )
+         }}
     runs-on: self-hosted
     environment: ${{ inputs.environment }}
     defaults:
@@ -179,8 +200,17 @@ jobs:
 
         
   destroy:
-    if: ${{ inputs.runDestroy }}
     needs: [apply, plan, validate, fmt, init]
+    if: ${{ always()
+            && inputs.runDestroy
+            && (
+                 ( inputs.runApply                                              && needs.apply.result    == 'success' ) ||
+                 ( !inputs.runApply && inputs.runPlan                           && needs.plan.result     == 'success' ) ||
+                 ( !inputs.runApply && !inputs.runPlan && inputs.runValidate    && needs.validate.result == 'success' ) ||
+                 ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result == 'success' ) ||
+                 ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
+               )
+         }}
     runs-on: self-hosted
     environment: ${{ inputs.environment }}
     defaults:
