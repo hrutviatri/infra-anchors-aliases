@@ -7,8 +7,8 @@ on:
     inputs:
       do_init:     { type: boolean, default: true,  description: "Run terraform init?" }
       do_fmt:      { type: boolean, default: false, description: "Run terraform fmt?" }
-      do_validate: { type: boolean, default: true,  description: "Run terraform validate?" }
-      do_plan:     { type: boolean, default: true,  description: "Run terraform plan?" }
+      do_validate: { type: boolean, default: false,  description: "Run terraform validate?" }
+      do_plan:     { type: boolean, default: false,  description: "Run terraform plan?" }
       do_apply:    { type: boolean, default: false, description: "Run terraform apply?" }
       do_destroy:  { type: boolean, default: false, description: "Run terraform destroy?" }
 
