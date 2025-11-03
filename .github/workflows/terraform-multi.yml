@@ -85,28 +85,7 @@ jobs:
       - name: Terraform Init (remote backend)
         run: terraform init -input=false -backend-config="resource_group_name=${{ inputs.rgname }}" -backend-config="storage_account_name=${{ inputs.saname }}" -backend-config="container_name=${{ inputs.scname }}" -backend-config="key=${{ inputs.key }}"
 
-# ---------- FMT WITH ENV (approval) ----------
-  fmt_with_env:
-    needs: [init_with_env, init_direct]
-    if: ${{ inputs.runFmt && ( !inputs.runInit || (needs.init_with_env.result == 'success' || needs.init_direct.result == 'success') ) }}
-    runs-on: self-hosted
-    environment:
-      name: ${{ inputs.environment }}
-    defaults:
-      run:
-        working-directory: infra
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Terraform fmt (apply formatting)
-        run: terraform fmt -recursive
-
-      - name: Show formatted files (if any)
-        run: |
-          git --no-pager status --porcelain || true
-          git --no-pager diff --name-only || true
-
-  # ---------- FMT DIRECT (no approval) ----------
+# ---------- FMT DIRECT (no approval) ----------
   fmt_direct:
     needs: [init_with_env, init_direct]
     if: ${{ inputs.runFmt && ( !inputs.runInit || (needs.init_with_env.result == 'success' || needs.init_direct.result == 'success') ) }}
@@ -117,13 +96,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Terraform fmt (apply formatting)
-        run: terraform fmt -recursive
+      - name: Terraform fmt
+        run: terraform fmt
 
       - name: Show formatted files (if any)
         run: |
           git --no-pager status --porcelain || true
           git --no-pager diff --name-only || true
+
+          
   # validate:
   #   needs: [fmt, init]
   #   if: ${{ always()
