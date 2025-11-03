@@ -47,8 +47,7 @@ jobs:
           echo "useEnvironmentDestroy=${{ inputs.useEnvironmentDestroy }}"
 
   init_with_env:
-    if: ${{ and(inputs.runInit, inputs.useEnvironmentInit) }}
-    # if: ${{ inputs.runInit && inputs.useEnvironmentInit }}
+    if: ${{ inputs.runInit && inputs.useEnvironmentInit }}
     runs-on: self-hosted    # apne Windows runner labels yaha daal do (X64 ya custom labels bhi)
     environment:
       name: ${{ inputs.environment }}  # e.g., "prod" — yahi env me reviewers set honge
@@ -69,8 +68,7 @@ jobs:
 
   # ---------- INIT DIRECT (no approval) ----------
   init_direct:
-    if: ${{ and(inputs.runInit, not(inputs.useEnvironmentInit)) }}
-    # if: ${{ inputs.runInit && !inputs.useEnvironmentInit }}
+    if: ${{ inputs.runInit && !inputs.useEnvironmentInit }}
     runs-on: self-hosted    # same runner, no environment (no approval)
     defaults:
       run:
