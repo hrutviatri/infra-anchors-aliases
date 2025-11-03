@@ -140,7 +140,7 @@ jobs:
         run: terraform apply -auto-approve "plan-${{ inputs.environment }}.tfplan"
 
 
-   apply_noenv:
+  apply_noenv:
     needs: [plan, validate, fmt, init]
     if: ${{ inputs.runApply && (inputs.useEnvironment != true) && (
              ( inputs.runPlan                                 && needs.plan.result     == 'success' ) ||
