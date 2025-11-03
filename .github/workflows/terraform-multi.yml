@@ -54,7 +54,7 @@ jobs:
     defaults: { run: { working-directory: infra } }
     steps:
       - uses: actions/checkout@v4
-      - run: terraform fmt -check -recursive || terraform fmt -recursive
+      - run: terraform fmt
 
   validate:
     if: ${{ inputs.runValidate }}
