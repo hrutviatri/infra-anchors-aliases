@@ -21,6 +21,8 @@ vnets = {
   }
 }
 
+
+
 nsg = {
   web_nsg = {
     nsg_name = "pahelansg-prod"
