@@ -18,8 +18,8 @@ on:
       runDestroy:       { type: boolean, default: false }
 
       # separate approval toggles
-      useEnvironmentApply:   { type: boolean, default: false }
-      useEnvironmentDestroy: { type: boolean, default: false }
+      useEnvironmentApply:   { type: boolean, default: true }
+      useEnvironmentDestroy: { type: boolean, default: true }
 
     secrets:
       AZURE_CLIENT_ID:       { required: true }
