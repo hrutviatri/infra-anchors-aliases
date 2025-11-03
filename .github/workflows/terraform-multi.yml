@@ -105,12 +105,15 @@ jobs:
             infra/.terraform.lock.hcl
           if-no-files-found: error
 
- # ── APPLY (with environment) ─────────────────────────────────────────────
   apply_env:
     needs: [plan, validate, fmt, init]
-    if: ${{ inputs.runApply && inputs.useEnvironment }}
+    if: ${{ inputs.runApply && (inputs.useEnvironment == true) && (
+             ( inputs.runPlan                                 && needs.plan.result     == 'success' ) ||
+             ( !inputs.runPlan && inputs.runValidate          && needs.validate.result == 'success' ) ||
+             ( !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result  == 'success' ) ||
+             ( !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
+           ) }}
     runs-on: self-hosted
-    # environment: ${{ inputs.environment }}
     defaults: { run: { working-directory: infra } }
     steps:
       - name: Checkout
@@ -136,10 +139,15 @@ jobs:
       - name: Terraform apply
         run: terraform apply -auto-approve "plan-${{ inputs.environment }}.tfplan"
 
-  # ── APPLY (without environment) ──────────────────────────────────────────
-  apply_noenv:
+
+   apply_noenv:
     needs: [plan, validate, fmt, init]
-    if: ${{ inputs.runApply && !inputs.useEnvironment }}
+    if: ${{ inputs.runApply && (inputs.useEnvironment != true) && (
+             ( inputs.runPlan                                 && needs.plan.result     == 'success' ) ||
+             ( !inputs.runPlan && inputs.runValidate          && needs.validate.result == 'success' ) ||
+             ( !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result  == 'success' ) ||
+             ( !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
+           ) }}
     runs-on: self-hosted
     defaults: { run: { working-directory: infra } }
     steps:
@@ -165,6 +173,7 @@ jobs:
           path: infra
       - name: Terraform apply
         run: terraform apply -auto-approve "plan-${{ inputs.environment }}.tfplan"
+
 
   # ── DESTROY (with environment) ───────────────────────────────────────────
   destroy_env:
