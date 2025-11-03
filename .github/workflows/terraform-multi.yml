@@ -91,7 +91,9 @@ jobs:
     needs: [init_with_env, init_direct]
     if: ${{ inputs.runFmt && (
             (!inputs.runInit) ||
-            (inputs.runInit && (needs.init_with_env.result == 'success' || needs.init_direct.result == 'success'))
+            (inputs.runInit && (
+              (needs.init_with_env.result == 'success' || needs.init_direct.result == 'success')
+            ))
           ) }}
     runs-on: self-hosted
     defaults:
@@ -99,9 +101,9 @@ jobs:
         working-directory: infra
     steps:
       - uses: actions/checkout@v4
+      - name: Terraform Format
+        run: terraform fmt -check -diff
 
-      - name: Terraform fmt (apply formatting)
-        run: terraform fmt
 
           
   # validate:
