@@ -34,19 +34,16 @@ jobs:
       scname: ritkascs
       key: prod.tfstate
 
-      # 👇 yahi decide hoga
-      use_env_apply: true
-      use_env_destroy: true
-
-      # 👇 Simple clear logic
-      # If push → only init/fmt/validate/plan true
-      # If manual → follow checkbox inputs
-      runInit: ${{ github.event_name == 'push' || inputs.do_init }}
-      runFmt: ${{ github.event_name == 'push' || inputs.do_fmt }}
+      runInit:     ${{ github.event_name == 'push' || inputs.do_init }}
+      runFmt:      ${{ github.event_name == 'push' || inputs.do_fmt }}
       runValidate: ${{ github.event_name == 'push' || inputs.do_validate }}
-      runPlan: ${{ github.event_name == 'push' || inputs.do_plan }}
-      runApply: ${{ github.event_name == 'push' || inputs.do_apply }}
-      runDestroy: ${{ github.event_name != 'push' && inputs.do_destroy }}
+      runPlan:     ${{ github.event_name == 'push' || inputs.do_plan }}
+      runApply:    ${{ github.event_name == 'push' || inputs.do_apply }}
+      runDestroy:  ${{ github.event_name != 'push' && inputs.do_destroy }}
+
+      # 👇 NEW
+      useEnvironment: true
+
 
     secrets:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
