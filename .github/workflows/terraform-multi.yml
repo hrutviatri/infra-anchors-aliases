@@ -11,7 +11,7 @@ on:
       key:              { type: string,  required: true }
 
       runInit:          { type: boolean, default: false }
-      runFmt:           { type: boolean, default: false }
+      runFmt:           { type: boolean, default: true }
       runValidate:      { type: boolean, default: false }
       runPlan:          { type: boolean, default: false }
       runApply:         { type: boolean, default: false }
