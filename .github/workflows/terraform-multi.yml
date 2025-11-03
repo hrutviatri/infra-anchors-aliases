@@ -86,20 +86,9 @@ jobs:
         run: terraform init -input=false -backend-config="resource_group_name=${{ inputs.rgname }}" -backend-config="storage_account_name=${{ inputs.saname }}" -backend-config="container_name=${{ inputs.scname }}" -backend-config="key=${{ inputs.key }}"
   
   
-  # ---------- INIT NOOP (runs ONLY when init was NOT requested) ----------
-  init_noop:
-    if: ${{ !inputs.runInit }}
-    runs-on: self-hosted
-    defaults:
-      run:
-        working-directory: infra
-    steps:
-      - name: Init skipped - noop
-        run: echo "runInit is false — skipping real init, noop job to satisfy needs."
-          # produce a harmless success
-  
+
   fmt:
-    needs: [init_with_env, init_direct, init_noop]
+    needs: [init_with_env, init_direct]
     if: ${{ inputs.runFmt && ( !inputs.runInit || needs.init_with_env.result == 'success' || needs.init_direct.result == 'success' || needs.init_noop.result == 'success' ) }}
     runs-on: self-hosted
     defaults:
