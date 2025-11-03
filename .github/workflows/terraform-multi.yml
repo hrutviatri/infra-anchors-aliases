@@ -89,7 +89,10 @@ jobs:
 
   fmt:
     needs: [init_with_env, init_direct]
-    if: ${{ inputs.runFmt && ( !inputs.runInit || needs.init_with_env.result == 'success' || needs.init_direct.result == 'success' || needs.init_noop.result == 'success' ) }}
+    if: ${{ inputs.runFmt && (
+            (!inputs.runInit) ||
+            (inputs.runInit && (needs.init_with_env.result == 'success' || needs.init_direct.result == 'success'))
+          ) }}
     runs-on: self-hosted
     defaults:
       run:
@@ -98,12 +101,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Terraform fmt (apply formatting)
-        run: terraform fmt -recursive
-
-      - name: Show formatted files (if any)
-        run: |
-          git --no-pager status --porcelain || true
-          git --no-pager diff --name-only || true
+        run: terraform fmt
 
           
   # validate:
