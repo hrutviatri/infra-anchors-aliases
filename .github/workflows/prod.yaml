@@ -12,6 +12,8 @@ on:
       do_plan:                 { type: boolean, default: false,  description: "Run terraform plan?" }
       do_apply:                { type: boolean, default: false, description: "Run terraform apply?" }
       do_destroy:              { type: boolean, default: false, description: "Run terraform destroy?" }
+
+      use_environment_init:    { type: boolean, default: false,   description: "Require environment approval for init?" }
       use_environment_apply:   { type: boolean, default: true,  description: "Require environment approval for apply?" }
       use_environment_destroy: { type: boolean, default: true,  description: "Require environment approval for destroy?" }
 
@@ -43,6 +45,7 @@ jobs:
       runDestroy:  ${{ inputs.do_destroy }}
 
       # Approval toggles (separate)
+      useEnvironmentInit:    ${{ inputs.use_environment_init }}
       useEnvironmentApply:   ${{ github.event_name == 'push' || inputs.use_environment_apply }}
       useEnvironmentDestroy: ${{ inputs.use_environment_destroy }}
 
