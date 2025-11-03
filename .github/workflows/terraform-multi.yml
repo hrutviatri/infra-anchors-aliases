@@ -95,8 +95,7 @@ jobs:
         working-directory: infra
     steps:
       - name: Init skipped - noop
-        run: |
-          echo "runInit is false — skipping real init, noop job to satisfy needs."
+        run: echo "runInit is false — skipping real init, noop job to satisfy needs."
           # produce a harmless success
   
   fmt:
