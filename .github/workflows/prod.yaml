@@ -6,13 +6,14 @@ on:
       - 'environments/prod.tfvars'
   workflow_dispatch:
     inputs:
-      do_init:         { type: boolean, default: true,  description: "Run terraform init?" }
-      do_fmt:          { type: boolean, default: true,  description: "Run terraform fmt?" }
-      do_validate:     { type: boolean, default: true,  description: "Run terraform validate?" }
-      do_plan:         { type: boolean, default: true,  description: "Run terraform plan?" }
-      do_apply:        { type: boolean, default: false, description: "Run terraform apply?" }
-      do_destroy:      { type: boolean, default: false, description: "Run terraform destroy?" }
-      use_environment: { type: boolean, default: true,  description: "Require environment approval for apply?" }
+      do_init:                 { type: boolean, default: true,  description: "Run terraform init?" }
+      do_fmt:                  { type: boolean, default: true,  description: "Run terraform fmt?" }
+      do_validate:             { type: boolean, default: true,  description: "Run terraform validate?" }
+      do_plan:                 { type: boolean, default: true,  description: "Run terraform plan?" }
+      do_apply:                { type: boolean, default: false, description: "Run terraform apply?" }
+      do_destroy:              { type: boolean, default: false, description: "Run terraform destroy?" }
+      use_environment_apply:   { type: boolean, default: true,  description: "Require environment approval for apply?" }
+      use_environment_destroy: { type: boolean, default: true,  description: "Require environment approval for destroy?" }
 
 permissions:
   contents: read
@@ -24,16 +25,16 @@ concurrency:
 
 jobs:
   call:
-    uses: ./.github/workflows/terraform-multi.yml   # 👈 ensure extension matches
+    uses: ./.github/workflows/terraform-multi.yml
     with:
-      environment: prod
-      tfvars_file: environments/prod.tfvars
-      rgname: ritkargs
-      saname: ritkasas
-      scname: ritkascs
-      key: prod.tfstate
+      environment:  prod
+      tfvars_file:  environments/prod.tfvars
+      rgname:       ritkargs
+      saname:       ritkasas
+      scname:       ritkascs
+      key:          prod.tfstate
 
-      # Logic: auto on push, manual configurable
+      # Push → auto: init/fmt/validate/plan + apply; destroy normally manual hi rakhenge
       runInit:     ${{ github.event_name == 'push' || inputs.do_init }}
       runFmt:      ${{ github.event_name == 'push' || inputs.do_fmt }}
       runValidate: ${{ github.event_name == 'push' || inputs.do_validate }}
@@ -41,8 +42,10 @@ jobs:
       runApply:    ${{ github.event_name == 'push' || inputs.do_apply }}
       runDestroy:  ${{ github.event_name != 'push' && inputs.do_destroy }}
 
-      # Approval toggle: push → always true, manual → checkbox
-      useEnvironment: ${{ github.event_name == 'push' || inputs.use_environment }}
+      # Separate approval toggles:
+      useEnvironmentApply:   ${{ github.event_name == 'push' || inputs.use_environment_apply }}
+      useEnvironmentDestroy: ${{ github.event_name == 'push' && false || inputs.use_environment_destroy }}
+      # ↑ Note: push pe destroy waise bhi off hai (runDestroy false), isliye yeh mapping safe hai.
 
     secrets:
       AZURE_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
