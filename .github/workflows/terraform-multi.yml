@@ -105,16 +105,12 @@ jobs:
             infra/.terraform.lock.hcl
           if-no-files-found: error
 
-# ── APPLY (with environment) ─────────────────────────────────────────────
+ # ── APPLY (with environment) ─────────────────────────────────────────────
   apply_env:
     needs: [plan, validate, fmt, init]
-    if: ${{ inputs.runApply && inputs.useEnvironment && (
-             ( inputs.runPlan                                 && needs.plan.result     == 'success' ) ||
-             ( !inputs.runPlan && inputs.runValidate          && needs.validate.result == 'success' ) ||
-             ( !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result  == 'success' ) ||
-             ( !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
-           ) }}
+    if: ${{ inputs.runApply && inputs.useEnvironment }}
     runs-on: self-hosted
+    environment: ${{ inputs.environment }}
     defaults: { run: { working-directory: infra } }
     steps:
       - name: Checkout
@@ -137,20 +133,13 @@ jobs:
         with:
           name: tf-plan-${{ inputs.environment }}
           path: infra
-      - name: Terraform apply (with environment)
-        if: ${{ inputs.useEnvironment }}
-        environment: ${{ inputs.environment }}
+      - name: Terraform apply
         run: terraform apply -auto-approve "plan-${{ inputs.environment }}.tfplan"
 
   # ── APPLY (without environment) ──────────────────────────────────────────
   apply_noenv:
     needs: [plan, validate, fmt, init]
-    if: ${{ inputs.runApply && !inputs.useEnvironment && (
-             ( inputs.runPlan                                 && needs.plan.result     == 'success' ) ||
-             ( !inputs.runPlan && inputs.runValidate          && needs.validate.result == 'success' ) ||
-             ( !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result  == 'success' ) ||
-             ( !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
-           ) }}
+    if: ${{ inputs.runApply && !inputs.useEnvironment }}
     runs-on: self-hosted
     defaults: { run: { working-directory: infra } }
     steps:
@@ -174,20 +163,15 @@ jobs:
         with:
           name: tf-plan-${{ inputs.environment }}
           path: infra
-      - name: Terraform apply (no environment)
+      - name: Terraform apply
         run: terraform apply -auto-approve "plan-${{ inputs.environment }}.tfplan"
 
   # ── DESTROY (with environment) ───────────────────────────────────────────
   destroy_env:
     needs: [apply_env, apply_noenv, plan, validate, fmt, init]
-    if: ${{ inputs.runDestroy && inputs.useEnvironment && (
-             ( inputs.runApply && (needs.apply_env.result == 'success' || needs.apply_noenv.result == 'success') ) ||
-             ( !inputs.runApply && inputs.runPlan && needs.plan.result == 'success' ) ||
-             ( !inputs.runApply && !inputs.runPlan && inputs.runValidate && needs.validate.result == 'success' ) ||
-             ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result == 'success' ) ||
-             ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
-           ) }}
+    if: ${{ inputs.runDestroy && inputs.useEnvironment }}
     runs-on: self-hosted
+    environment: ${{ inputs.environment }}
     defaults: { run: { working-directory: infra } }
     steps:
       - name: Checkout
@@ -205,21 +189,13 @@ jobs:
             -backend-config="storage_account_name=${{ inputs.saname }}" \
             -backend-config="container_name=${{ inputs.scname }}" \
             -backend-config="key=${{ inputs.key }}"
-      - name: Terraform destroy (with environment)
-        if: ${{ inputs.useEnvironment }}
-        environment: ${{ inputs.environment }}
+      - name: Terraform destroy
         run: terraform destroy -auto-approve -var-file="../${{ inputs.tfvars_file }}"
 
   # ── DESTROY (without environment) ────────────────────────────────────────
   destroy_noenv:
     needs: [apply_env, apply_noenv, plan, validate, fmt, init]
-    if: ${{ inputs.runDestroy && !inputs.useEnvironment && (
-             ( inputs.runApply && (needs.apply_env.result == 'success' || needs.apply_noenv.result == 'success') ) ||
-             ( !inputs.runApply && inputs.runPlan && needs.plan.result == 'success' ) ||
-             ( !inputs.runApply && !inputs.runPlan && inputs.runValidate && needs.validate.result == 'success' ) ||
-             ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && inputs.runFmt && needs.fmt.result == 'success' ) ||
-             ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && needs.init.result == 'success' )
-           ) }}
+    if: ${{ inputs.runDestroy && !inputs.useEnvironment }}
     runs-on: self-hosted
     defaults: { run: { working-directory: infra } }
     steps:
@@ -238,5 +214,5 @@ jobs:
             -backend-config="storage_account_name=${{ inputs.saname }}" \
             -backend-config="container_name=${{ inputs.scname }}" \
             -backend-config="key=${{ inputs.key }}"
-      - name: Terraform destroy (no environment)
+      - name: Terraform destroy
         run: terraform destroy -auto-approve -var-file="../${{ inputs.tfvars_file }}"
