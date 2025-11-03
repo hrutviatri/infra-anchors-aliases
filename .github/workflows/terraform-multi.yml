@@ -178,21 +178,31 @@ jobs:
   # ===== DESTROY =====
   destroy_protected:
     needs: [init, fmt, validate, plan, apply_protected, apply_unprotected]
-    if: ${{ inputs.runDestroy
-            && inputs.useEnvironmentDestroy
-            && (
-                 ( inputs.runApply
-                   && (
-                        ( inputs.useEnvironmentApply  && needs.apply_protected.result   == 'success' ) ||
-                        ( !inputs.useEnvironmentApply && needs.apply_unprotected.result == 'success' )
-                      )
-                 )
-                  || ( inputs.runPlan     && needs.plan.result     == 'success' )
-                 || ( inputs.runValidate && needs.validate.result == 'success' )
-                 || ( inputs.runFmt      && needs.fmt.result      == 'success' )
-                 || ( inputs.runInit     && needs.init.result     == 'success' )
-               )
-         }}
+    if: >-
+      ${{
+        inputs.runDestroy &&
+        inputs.useEnvironmentDestroy &&
+        (
+          # 1) Apply enabled ho to usi ki success chaiye (protected/unprotected jo applicable ho)
+          (
+            inputs.runApply &&
+            (
+              (  inputs.useEnvironmentApply  && success(needs.apply_protected)   ) ||
+              ( !inputs.useEnvironmentApply && success(needs.apply_unprotected) )
+            )
+          )
+          # 2) Warna Plan enabled ho to plan success chaiye
+          || ( !inputs.runApply && inputs.runPlan     && success(needs.plan) )
+          # 3) Warna Validate enabled ho to validate success
+          || ( !inputs.runApply && !inputs.runPlan && inputs.runValidate && success(needs.validate) )
+          # 4) Warna Fmt enabled ho to fmt success
+          || ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && inputs.runFmt && success(needs.fmt) )
+          # 5) Warna Init enabled ho to init success
+          || ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && inputs.runInit && success(needs.init) )
+          # 6) Agar upar ka koi bhi stage enabled hi nahi tha -> destroy akela allowed
+          || ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && !inputs.runInit )
+        )
+      }}
     runs-on: self-hosted
     environment: ${{ inputs.environment }}
     defaults: { run: { working-directory: infra } }
@@ -207,25 +217,30 @@ jobs:
         run: terraform init -input=false -backend-config="resource_group_name=${{ inputs.rgname }}" -backend-config="storage_account_name=${{ inputs.saname }}" -backend-config="container_name=${{ inputs.scname }}" -backend-config="key=${{ inputs.key }}"
       - name: Terraform destroy (protected)
         run: terraform destroy -auto-approve -var-file="../${{ inputs.tfvars_file }}"
+
   
   
   destroy_unprotected:
     needs: [init, fmt, validate, plan, apply_protected, apply_unprotected]
-    if: ${{ inputs.runDestroy
-            && !inputs.useEnvironmentDestroy
-            && (
-                 ( inputs.runApply
-                   && (
-                        ( inputs.useEnvironmentApply  && needs.apply_protected.result   == 'success' ) ||
-                        ( !inputs.useEnvironmentApply && needs.apply_unprotected.result == 'success' )
-                      )
-                 )
-                 || ( inputs.runPlan     && needs.plan.result     == 'success' )
-                 || ( inputs.runValidate && needs.validate.result == 'success' )
-                 || ( inputs.runFmt      && needs.fmt.result      == 'success' )
-                 || ( inputs.runInit     && needs.init.result     == 'success' )
-               )
-         }}
+    if: >-
+      ${{
+        inputs.runDestroy &&
+        !inputs.useEnvironmentDestroy &&
+        (
+          (
+            inputs.runApply &&
+            (
+              (  inputs.useEnvironmentApply  && success(needs.apply_protected)   ) ||
+              ( !inputs.useEnvironmentApply && success(needs.apply_unprotected) )
+            )
+          )
+          || ( !inputs.runApply && inputs.runPlan     && success(needs.plan) )
+          || ( !inputs.runApply && !inputs.runPlan && inputs.runValidate && success(needs.validate) )
+          || ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && inputs.runFmt && success(needs.fmt) )
+          || ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && inputs.runInit && success(needs.init) )
+          || ( !inputs.runApply && !inputs.runPlan && !inputs.runValidate && !inputs.runFmt && !inputs.runInit )
+        )
+      }}
     runs-on: self-hosted
     defaults: { run: { working-directory: infra } }
     steps:
@@ -239,4 +254,3 @@ jobs:
         run: terraform init -input=false -backend-config="resource_group_name=${{ inputs.rgname }}" -backend-config="storage_account_name=${{ inputs.saname }}" -backend-config="container_name=${{ inputs.scname }}" -backend-config="key=${{ inputs.key }}"
       - name: Terraform destroy (unprotected)
         run: terraform destroy -auto-approve -var-file="../${{ inputs.tfvars_file }}"
-  
