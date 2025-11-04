@@ -11,6 +11,8 @@ on:
       # do_fmt:                  { type: boolean, default: false,  description: "Run terraform fmt?" }
       # do_validate:             { type: boolean, default: false,  description: "Run terraform validate?" }
       do_plan:                 { type: boolean, default: false,  description: "Run terraform plan?" }
+
+      use_environment_plan:   { type: boolean, default: false,  description: "Require environment approval for apply?" }
       do_apply:                { type: boolean, default: false, description: "Run terraform apply?" }
       do_destroy:              { type: boolean, default: false, description: "Run terraform destroy?" }
 
@@ -48,6 +50,9 @@ jobs:
       # Approval toggles (separate)
       # useEnvironmentInit:    ${{ github.event_name == 'push' || inputs.use_environment_init }}   # at push use with environment
       useEnvironmentInit: ${{ github.event_name != 'push' && inputs.use_environment_init }}    # at push use direct without environment
+
+      # useEnvironmentPlan:    ${{ github.event_name == 'push' || inputs.use_environment_init }}   # at push use with environment
+      useEnvironmentPlan: ${{ github.event_name != 'push' && inputs.use_environment_init }}    # at push use direct without environment
 
       
       useEnvironmentApply:   ${{ github.event_name == 'push' || inputs.use_environment_apply }}
