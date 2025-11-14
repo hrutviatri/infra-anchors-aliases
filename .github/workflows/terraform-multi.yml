@@ -139,7 +139,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: tf-plan-${{ inputs.environment }}
-          path: infra/tf-plan-${{ inputs.environment }}.tfplan
+          path: infra/tf-plan-${{ inputs.environment }}
 
             
 
