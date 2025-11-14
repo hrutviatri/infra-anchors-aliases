@@ -192,7 +192,7 @@ jobs:
       
       - name: Terraform Apply
         if: ${{ inputs.require_approval || github.event_name == 'push' }}
-        run: terraform apply -auto-approve "tf-plan-${{ inputs.environment }}"
+        run: terraform apply -auto-approve "tf-plan-${{ inputs.environment }}.tfplan"
 
 
   # # 4️⃣ DESTROY
