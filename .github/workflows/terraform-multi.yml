@@ -109,7 +109,8 @@ jobs:
     needs: [plan]
     if: ${{ inputs.runApply && needs.plan.result == 'success' }}
     runs-on: self-hosted
-    environment: ${{ inputs.useEnvironmentApply && inputs.environment || '' }}
+    # environment: ${{ inputs.useEnvironmentApply && inputs.environment || '' }}
+    environment: ${{ inputs.environment }}
     defaults:
       run:
         working-directory: ${{ env.WORKDIR }}
