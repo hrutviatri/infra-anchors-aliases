@@ -1,43 +1,66 @@
 name: dev
+
 on:
   push:
+    branches:
+      - main
     paths:
       - 'environments/dev.tfvars'
+
   workflow_dispatch:
     inputs:
-      do_init:     { type: boolean, default: true,  description: "Run terraform init?" }
-      do_fmt:      { type: boolean, default: true,  description: "Run terraform fmt?" }
-      do_validate: { type: boolean, default: true,  description: "Run terraform validate?" }
-      do_plan:     { type: boolean, default: true,  description: "Run terraform plan?" }
-      do_apply:    { type: boolean, default: false, description: "Run terraform apply?" }
-      do_destroy:  { type: boolean, default: false, description: "Run terraform destroy?" }
+      use_environment_init:    { type: boolean, default: false, description: "Require approval before Init?" }
+      do_init:                 { type: boolean, default: false, description: "Run terraform init + fmt + validate?" }
+
+      use_environment_plan:    { type: boolean, default: false, description: "Require approval before Plan?" }
+      do_plan:                 { type: boolean, default: false, description: "Run terraform plan?" }
+
+      use_environment_apply:   { type: boolean, default: false, description: "Require approval before Apply?" }
+      do_apply:                { type: boolean, default: false, description: "Run terraform apply?" }
+
+      use_environment_destroy: { type: boolean, default: false, description: "Require approval before Destroy?" }
+      do_destroy:              { type: boolean, default: false, description: "Run terraform destroy?" }
 
 permissions:
   contents: read
   id-token: write
 
+concurrency:
+  group: dev-tf
+  cancel-in-progress: false
+
 jobs:
   call:
     uses: ./.github/workflows/terraform-multi.yml
     with:
-      environment: dev
-      tfvars_file: environments/dev.tfvars
-      rgname: ritkargv
-      saname: ritkasav
-      scname: ritkascv
-      key: dev.tfstate
+      environment:  dev
+      tfvars_file:  environments/dev.tfvars
+      rgname:       ritkargvdev
+      saname:       ritkasavdev
+      scname:       ritkascvdev
+      key:          dev.tfstate
 
-      # 👇 Simple clear logic
-      # If push → only init/fmt/validate/plan true
-      # If manual → follow checkbox inputs
-      runInit:     ${{ github.event_name == 'push' || inputs.do_init }}
-      runFmt:      ${{ github.event_name == 'push' || inputs.do_fmt }}
-      runValidate: ${{ github.event_name == 'push' || inputs.do_validate }}
-      runPlan:     ${{ github.event_name == 'push' || inputs.do_plan }}
-      runApply:    ${{ github.event_name != 'push' && inputs.do_apply }}
-      runDestroy:  ${{ github.event_name != 'push' && inputs.do_destroy }}
+      # Run toggles
+      runInit:     ${{ github.event_name == 'push' || inputs.do_init == true }}
+      runPlan:     ${{ github.event_name == 'push' || inputs.do_plan == true }}
+      
+      # ❌ Push par apply nahi chalega  
+      # ✔ Apply sirf manual dispatch ke through chalega
+      runApply:    ${{ github.event_name == 'workflow_dispatch' && inputs.do_apply == true }}
+
+      # Destroy only manual
+      runDestroy:  ${{ github.event_name == 'workflow_dispatch' && inputs.do_destroy == true }}
+
+      # Approval toggles
+      useEnvironmentInit:    ${{ github.event_name == 'workflow_dispatch' && inputs.use_environment_init == true }}
+      useEnvironmentPlan:    ${{ github.event_name == 'workflow_dispatch' && inputs.use_environment_plan == true }}
+
+      # ✔ Apply approval only during manual trigger
+      useEnvironmentApply:   ${{ github.event_name == 'workflow_dispatch' && inputs.use_environment_apply == true }}
+
+      useEnvironmentDestroy: ${{ github.event_name == 'workflow_dispatch' && inputs.use_environment_destroy == true }}
 
     secrets:
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      AZURE_CLIENT_ID:       ${{ secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID:       ${{ secrets.AZURE_TENANT_ID }}
       AZURE_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
