@@ -3,8 +3,6 @@ resource_groups = {
     name     = "rit-hrutviatri"
     location = "North Europe"
   }
-
-
 }
 
 ######
