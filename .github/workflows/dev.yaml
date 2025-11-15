@@ -35,9 +35,9 @@ jobs:
     with:
       environment:  dev
       tfvars_file:  environments/dev.tfvars
-      rgname:       ritkargvdev
-      saname:       ritkasavdev
-      scname:       ritkascvdev
+      rgname:       ritkargv
+      saname:       ritkasav
+      scname:       ritkascv
       key:          dev.tfstate
 
       # Run toggles
@@ -57,7 +57,6 @@ jobs:
 
       # ✔ Apply approval only during manual trigger
       useEnvironmentApply:   ${{ github.event_name == 'workflow_dispatch' && inputs.use_environment_apply == true }}
-
       useEnvironmentDestroy: ${{ github.event_name == 'workflow_dispatch' && inputs.use_environment_destroy == true }}
 
     secrets:
