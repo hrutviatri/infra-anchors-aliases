@@ -5,9 +5,12 @@ resource_groups = {
   }
 }
 
+
+
 ######
 ######
 ######
+
 
 
 vnets = {
