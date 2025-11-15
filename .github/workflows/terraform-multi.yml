@@ -45,13 +45,13 @@ jobs:
     steps:
       - name: Show triggerevent info
         run: |
-          echo "========================================================================"
-          echo " This workflow was triggered by, GITHUB EVENT:: ${{ github.event_name }}"
-          echo "========================================================================"
+          echo "=================================================================="
+          echo " This workflow was triggered by, GITHUB EVENT: ${{ github.event_name }}"
+          echo "=================================================================="
           echo ""
-          echo "============================================================"
+          echo "======================"
           echo "REF: ${{ github.ref }}"
-          echo "============================================================"
+          echo "======================"
           echo ""
 
       - name: Compute and print inputs + derived toggles
