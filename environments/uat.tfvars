@@ -5,6 +5,8 @@ resource_groups = {
   }
 }
 
+
+
 vnets = {
   vnet1 = {
     vnet_name     = "pahelavnet-uat"
@@ -19,6 +21,8 @@ vnets = {
     }
   }
 }
+
+
 
 nsg = {
   web_nsg = {
