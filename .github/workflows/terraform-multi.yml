@@ -145,7 +145,7 @@ jobs:
 
       # Use below mentioned with , when in provider.tf > provider "azurerm" > use_oidc = false (ya fir yeh line humne use hi nhi ki ho)
       - name: Terraform Plan
-        run: terraform plan -var-file="../environments/${{ inputs.environment }}" -out="tf-plan-${{ inputs.environment }}.tfplan"
+        run: terraform plan -var-file="../environments/${{ inputs.environment }}.tfplan" -out="tf-plan-${{ inputs.environment }}.tfplan"
       # Yha tak wala block...
 
       - name: Upload plan
